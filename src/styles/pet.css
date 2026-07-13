@@ -1,0 +1,125 @@
+.pet-root {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  background: transparent;
+}
+
+.pet-area {
+  position: relative;
+  cursor: grab;
+  flex: 0 0 auto;
+}
+
+.pet-area:active {
+  cursor: grabbing;
+}
+
+.pet-canvas {
+  line-height: 0;
+}
+
+.pet-canvas canvas {
+  display: block;
+}
+
+.pet-status-row {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.mood-indicator {
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.level-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cw-text);
+  background: var(--cw-panel);
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+
+.speech-bubble {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 240px;
+  background: var(--cw-panel);
+  border: 1px solid var(--cw-panel-border);
+  color: var(--cw-text);
+  border-radius: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(80, 60, 180, 0.35);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.speech-bubble-tail {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--cw-panel);
+  border-right: 1px solid var(--cw-panel-border);
+  border-bottom: 1px solid var(--cw-panel-border);
+}
+
+.pet-menu {
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--cw-panel);
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 10;
+  box-shadow: 0 6px 24px rgba(20, 10, 60, 0.6);
+}
+
+.pet-menu-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pet-menu-item:hover {
+  background: rgba(157, 140, 255, 0.28);
+}
+
+.pet-init-error {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  font-size: 11px;
+  color: #ffc4d2;
+  background: var(--cw-panel);
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+}

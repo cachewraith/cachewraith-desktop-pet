@@ -1,0 +1,117 @@
+:root {
+  --cw-purple: #9d8cff;
+  --cw-purple-deep: #6b56d6;
+  --cw-cyan: #4fd8ff;
+  --cw-pink: #ff9ad5;
+  --cw-ink: #1c1533;
+  --cw-panel: rgba(28, 21, 51, 0.92);
+  --cw-panel-border: rgba(157, 140, 255, 0.45);
+  --cw-text: #efeaff;
+  --cw-text-dim: #b9aede;
+  --cw-danger: #ff6b8b;
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* The pet window must be fully transparent — no page background at all. */
+body.window-pet {
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.window-settings {
+  background: linear-gradient(160deg, #171029 0%, #1e1638 60%, #251a45 100%);
+  color: var(--cw-text);
+}
+
+button {
+  font: inherit;
+  color: var(--cw-text);
+  background: rgba(157, 140, 255, 0.18);
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: rgba(157, 140, 255, 0.32);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--cw-cyan);
+  outline-offset: 2px;
+}
+
+button.primary {
+  background: var(--cw-purple-deep);
+  border-color: var(--cw-purple);
+}
+
+button.danger {
+  border-color: var(--cw-danger);
+  color: #ffc4d2;
+}
+
+input[type='text'],
+input[type='password'],
+select,
+textarea {
+  font: inherit;
+  color: var(--cw-text);
+  background: rgba(12, 8, 28, 0.65);
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.error-fallback {
+  padding: 24px;
+  color: var(--cw-text);
+  background: var(--cw-panel);
+  border-radius: 12px;
+  margin: 16px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
