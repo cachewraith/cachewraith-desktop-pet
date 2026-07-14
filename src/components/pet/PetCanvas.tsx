@@ -123,12 +123,11 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
     return (
       <div className="pet-canvas pet-canvas-fallback" style={{ width, height }} aria-hidden="true">
         {manifest && animation && (
-          <PetAnimationPreview
-            manifest={manifest}
-            animation={animation}
-            scale={5}
-            playing={!reducedMotion}
-          />
+          <div className={reducedMotion ? undefined : 'pet-fallback-float'}>
+            {/* Frame animation always plays, matching the Pixi renderer;
+                reduced motion only disables the floating bob. */}
+            <PetAnimationPreview manifest={manifest} animation={animation} scale={5} playing />
+          </div>
         )}
       </div>
     );
