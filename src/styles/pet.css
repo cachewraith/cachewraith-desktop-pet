@@ -33,6 +33,20 @@
   box-sizing: border-box;
 }
 
+.pet-fallback-float {
+  animation: pet-fallback-float 2.8s ease-in-out infinite;
+}
+
+@keyframes pet-fallback-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 .pet-status-row {
   position: absolute;
   bottom: 6px;
