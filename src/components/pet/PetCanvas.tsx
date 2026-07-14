@@ -3,9 +3,13 @@
  * character switches swap textures inside the single PixelPetController.
  * Animation is driven entirely by the Pixi ticker, never by React renders.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Application, Ticker } from 'pixi.js';
 
+import { PetAnimationPreview } from '../../features/pet-library/components/PetAnimationPreview';
+import { animationForState } from '../../features/pet-library/services/animation-fallback';
+import { getManifest } from '../../features/pet-library/services/pet-asset-loader';
+import { DEFAULT_PET_ID } from '../../features/pet-library/types/pet-library.types';
 import type { PetStateName } from '../../features/pet/pet.types';
 import { logger } from '../../utils/logger';
 import { PixelPetController } from './pixelPet';
@@ -22,6 +26,10 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<PixelPetController | null>(null);
   const appRef = useRef<Application | null>(null);
+  // When WebGL/WebGPU is unavailable (old GPUs, disabled hardware
+  // acceleration), we fall back to a CSS sprite-strip animation instead of
+  // showing an empty window.
+  const [rendererFailed, setRendererFailed] = useState(false);
   const latestProps = useRef({ petId, petState, reducedMotion });
   useEffect(() => {
     latestProps.current = { petId, petState, reducedMotion };
@@ -46,7 +54,8 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
           resolution: window.devicePixelRatio || 1,
         });
       } catch (error) {
-        logger.error('pixi', 'failed to initialize renderer', error);
+        logger.error('pixi', 'failed to initialize renderer, using CSS fallback', error);
+        if (!destroyed) setRendererFailed(true);
         return;
       }
       if (destroyed) {
@@ -107,6 +116,23 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
   useEffect(() => {
     controllerRef.current?.setReducedMotion(reducedMotion);
   }, [reducedMotion]);
+
+  if (rendererFailed) {
+    const manifest = getManifest(petId) ?? getManifest(DEFAULT_PET_ID);
+    const animation = animationForState(petState);
+    return (
+      <div className="pet-canvas pet-canvas-fallback" style={{ width, height }} aria-hidden="true">
+        {manifest && animation && (
+          <PetAnimationPreview
+            manifest={manifest}
+            animation={animation}
+            scale={5}
+            playing={!reducedMotion}
+          />
+        )}
+      </div>
+    );
+  }
 
   return <div ref={hostRef} className="pet-canvas" aria-hidden="true" />;
 }

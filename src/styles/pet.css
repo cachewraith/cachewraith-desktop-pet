@@ -24,6 +24,15 @@
   display: block;
 }
 
+/* WebGL-less fallback: bottom-centered like the Pixi sprite. */
+.pet-canvas-fallback {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
 .pet-status-row {
   position: absolute;
   bottom: 6px;

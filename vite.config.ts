@@ -9,6 +9,13 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   plugins: [react()],
 
+  build: {
+    // Keep pet sprite PNGs as real files instead of inlined data: URIs.
+    // Pixi's Assets.load resolves its loader from the URL's file extension,
+    // so inlined sprites fail to load in production builds.
+    assetsInlineLimit: 0,
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors
