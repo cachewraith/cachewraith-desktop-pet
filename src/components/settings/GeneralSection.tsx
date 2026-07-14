@@ -5,7 +5,12 @@ import { emit } from '@tauri-apps/api/event';
 import { getAutostartEnabled, setAutostartEnabled } from '../../services/autostart/autostart';
 import { formatAccelerator, getShortcutStatus } from '../../services/shortcuts/shortcuts';
 import type { ShortcutStatus } from '../../services/shortcuts/shortcuts';
-import { getPreference, setPreference, type ThemeName } from '../../services/storage/preferences';
+import {
+  getPreference,
+  setPreference,
+  type PetSizeName,
+  type ThemeName,
+} from '../../services/storage/preferences';
 import { AppEvents } from '../../types/events';
 import { logger } from '../../utils/logger';
 
@@ -14,6 +19,7 @@ export function GeneralSection() {
   const [sound, setSound] = useState(true);
   const [reducedMotion, setReducedMotionPref] = useState(false);
   const [theme, setTheme] = useState<ThemeName>('system');
+  const [petSize, setPetSize] = useState<PetSizeName>('medium');
   const [shortcut, setShortcut] = useState<ShortcutStatus | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -23,6 +29,7 @@ export function GeneralSection() {
       setSound(await getPreference('soundEnabled'));
       setReducedMotionPref(await getPreference('reducedMotion'));
       setTheme(await getPreference('theme'));
+      setPetSize(await getPreference('petSize'));
       setShortcut(await getShortcutStatus());
     })();
   }, []);
@@ -56,6 +63,12 @@ export function GeneralSection() {
   const changeTheme = async (value: ThemeName) => {
     setTheme(value);
     await setPreference('theme', value);
+  };
+
+  const changePetSize = async (value: PetSizeName) => {
+    setPetSize(value);
+    await setPreference('petSize', value);
+    await emit(AppEvents.petSizeChanged, value);
   };
 
   const resetPosition = async () => {
@@ -115,6 +128,18 @@ export function GeneralSection() {
           onChange={(e) => void toggleReducedMotion(e.target.checked)}
         />
         <span>Reduced motion (calmer animations)</span>
+      </label>
+
+      <label className="setting-row">
+        <span>Pet size</span>
+        <select
+          value={petSize}
+          onChange={(e) => void changePetSize(e.target.value as PetSizeName)}
+        >
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
       </label>
 
       <label className="setting-row">

@@ -18,11 +18,20 @@ interface PetCanvasProps {
   petId: string;
   petState: PetStateName;
   reducedMotion: boolean;
+  /** User-chosen size multiplier (1 = medium). */
+  sizeFactor: number;
   width: number;
   height: number;
 }
 
-export function PetCanvas({ petId, petState, reducedMotion, width, height }: PetCanvasProps) {
+export function PetCanvas({
+  petId,
+  petState,
+  reducedMotion,
+  sizeFactor,
+  width,
+  height,
+}: PetCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<PixelPetController | null>(null);
   const appRef = useRef<Application | null>(null);
@@ -30,10 +39,10 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
   // acceleration), we fall back to a CSS sprite-strip animation instead of
   // showing an empty window.
   const [rendererFailed, setRendererFailed] = useState(false);
-  const latestProps = useRef({ petId, petState, reducedMotion });
+  const latestProps = useRef({ petId, petState, reducedMotion, sizeFactor });
   useEffect(() => {
-    latestProps.current = { petId, petState, reducedMotion };
-  }, [petId, petState, reducedMotion]);
+    latestProps.current = { petId, petState, reducedMotion, sizeFactor };
+  }, [petId, petState, reducedMotion, sizeFactor]);
 
   // Create the Pixi application once.
   useEffect(() => {
@@ -70,6 +79,7 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
       app.stage.addChild(controller);
       // Apply any props that changed while the renderer was initializing.
       controller.setReducedMotion(latestProps.current.reducedMotion);
+      controller.setSizeFactor(latestProps.current.sizeFactor);
       controller.setPetState(latestProps.current.petState);
       void controller.setCharacter(latestProps.current.petId);
 
@@ -117,6 +127,10 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
     controllerRef.current?.setReducedMotion(reducedMotion);
   }, [reducedMotion]);
 
+  useEffect(() => {
+    controllerRef.current?.setSizeFactor(sizeFactor);
+  }, [sizeFactor]);
+
   if (rendererFailed) {
     const manifest = getManifest(petId) ?? getManifest(DEFAULT_PET_ID);
     const animation = animationForState(petState);
@@ -126,7 +140,12 @@ export function PetCanvas({ petId, petState, reducedMotion, width, height }: Pet
           <div className={reducedMotion ? undefined : 'pet-fallback-float'}>
             {/* Frame animation always plays, matching the Pixi renderer;
                 reduced motion only disables the floating bob. */}
-            <PetAnimationPreview manifest={manifest} animation={animation} scale={5} playing />
+            <PetAnimationPreview
+              manifest={manifest}
+              animation={animation}
+              scale={5 * sizeFactor}
+              playing
+            />
           </div>
         )}
       </div>

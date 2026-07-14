@@ -8,6 +8,15 @@ import { logger } from '../../utils/logger';
 
 export type ThemeName = 'system' | 'dark' | 'light';
 
+export type PetSizeName = 'small' | 'medium' | 'large';
+
+/** Multiplier applied to the pet's base render scale. */
+export const PET_SIZE_SCALES: Record<PetSizeName, number> = {
+  small: 0.7,
+  medium: 1,
+  large: 1.35,
+};
+
 export interface Preferences {
   windowX: number | null;
   windowY: number | null;
@@ -20,6 +29,7 @@ export interface Preferences {
   aiPersonality: string;
   firstRunDone: boolean;
   notificationsEnabled: boolean;
+  petSize: PetSizeName;
 }
 
 export const DEFAULT_AI_MODEL = 'gpt-5-mini';
@@ -44,6 +54,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   aiPersonality: DEFAULT_PERSONALITY,
   firstRunDone: false,
   notificationsEnabled: true,
+  petSize: 'medium',
 };
 
 const STORE_FILE = 'preferences.json';

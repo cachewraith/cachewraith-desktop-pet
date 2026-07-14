@@ -29,7 +29,11 @@ import {
   type PetDialogue,
 } from '../features/pet-library/types/pet-library.types';
 import { playSound, setMuted, syncMuteFromPreferences } from '../services/sound/sound';
-import { getPreference } from '../services/storage/preferences';
+import {
+  getPreference,
+  PET_SIZE_SCALES,
+  type PetSizeName,
+} from '../services/storage/preferences';
 import {
   hidePetWindow,
   restorePositionAndShow,
@@ -67,6 +71,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [petSize, setPetSize] = useState<PetSizeName>('medium');
   const [initError, setInitError] = useState<string | null>(null);
 
   const bubbleTimer = useRef<number | null>(null);
@@ -123,6 +128,7 @@ export default function App() {
             window.matchMedia('(prefers-reduced-motion: reduce)').matches
         );
         bubbleDuration.current = await getPreference('speechBubbleDurationMs');
+        setPetSize(await getPreference('petSize'));
 
         const petId = await resolveActivePetId();
         setActivePetId(petId);
@@ -251,6 +257,11 @@ export default function App() {
         if (service) {
           const profile = await service.refreshProfile();
           setPetName(profile.name);
+        }
+      }),
+      listen<PetSizeName>(AppEvents.petSizeChanged, (event) => {
+        if (event.payload === 'small' || event.payload === 'medium' || event.payload === 'large') {
+          setPetSize(event.payload);
         }
       }),
       listen<ActivePetChangedPayload>(AppEvents.activePetChanged, (event) => {
@@ -402,6 +413,7 @@ export default function App() {
           petId={activePetId}
           petState={petState}
           reducedMotion={reducedMotion}
+          sizeFactor={PET_SIZE_SCALES[petSize]}
           width={PET_WINDOW_SIZE.width}
           height={PET_WINDOW_SIZE.height - 40}
         />

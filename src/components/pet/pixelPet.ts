@@ -75,6 +75,15 @@ export class PixelPetController extends Container {
     this.ghostFallback?.setReducedMotion(value);
   }
 
+  /**
+   * User-chosen size multiplier. Scaling the whole container keeps the
+   * sprite, glow and particles proportional, and since children sit above
+   * the origin the pet stays planted on its baseline.
+   */
+  setSizeFactor(factor: number): void {
+    this.scale.set(factor);
+  }
+
   /** Load and display a character; safe to call repeatedly. */
   async setCharacter(petId: string): Promise<void> {
     const generation = ++this.loadGeneration;

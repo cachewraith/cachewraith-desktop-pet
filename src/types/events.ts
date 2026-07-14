@@ -14,6 +14,7 @@ export const AppEvents = {
   petStateChanged: 'cachewraith://pet-state-changed',
   petProfileChanged: 'cachewraith://pet-profile-changed',
   activePetChanged: 'cachewraith://active-pet-changed',
+  petSizeChanged: 'cachewraith://pet-size-changed',
 } as const;
 
 export type AppEventName = (typeof AppEvents)[keyof typeof AppEvents];
