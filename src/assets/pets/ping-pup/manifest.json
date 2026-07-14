@@ -1,0 +1,143 @@
+{
+  "id": "ping-pup",
+  "number": 4,
+  "name": "PingPup",
+  "slug": "ping-pup",
+  "description": "A cheerful network puppy that fetches every packet.",
+  "lore": "PingPup answers every ping with a wag. Latency has never been this adorable.",
+  "personality": "Loyal, bouncy and eager to please.",
+  "category": "animal",
+  "rarity": "common",
+  "tags": ["dog", "network", "starter"],
+  "featured": false,
+  "new": false,
+  "free": true,
+  "defaultUnlocked": true,
+  "thumbnail": "thumbnail.png",
+  "animations": {
+    "idle": {
+      "name": "idle",
+      "asset": "sprites/idle.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "walk": {
+      "name": "walk",
+      "asset": "sprites/walk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sleep": {
+      "name": "sleep",
+      "asset": "sprites/sleep.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 3,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "happy": {
+      "name": "happy",
+      "asset": "sprites/happy.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sad": {
+      "name": "sad",
+      "asset": "sprites/sad.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 4,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "hungry": {
+      "name": "hungry",
+      "asset": "sprites/hungry.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "eat": {
+      "name": "eat",
+      "asset": "sprites/eat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 7,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "talk": {
+      "name": "talk",
+      "asset": "sprites/talk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "celebrate": {
+      "name": "celebrate",
+      "asset": "sprites/celebrate.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 8,
+      "frameRate": 9,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    }
+  },
+  "effects": {
+    "celebrationParticle": "star",
+    "particleColors": ["#ffd166", "#e0b98a", "#4fd8ff"],
+    "glowColor": "#ffd166",
+    "idleFloatAmount": 1,
+    "idleFloatSpeed": 2.2
+  },
+  "dialogue": {
+    "greeting": ["*excited tail wag* You’re back!", "Woof! 0ms response time!"],
+    "clicked": ["*happy bark*", "Again! Again!", "*rolls over*"],
+    "hungry": ["*sad puppy eyes at the treat jar*", "Snack request timed out…"],
+    "fed": ["*chomp chomp* Best day ever!", "Woof! Thank you!"],
+    "happy": ["Everything is fetchable!", "*zoomies*"],
+    "sleeping": ["zzz… *paws twitch, chasing packets*"],
+    "celebrating": ["WOOF WOOF! Victory zoomies!"]
+  }
+}

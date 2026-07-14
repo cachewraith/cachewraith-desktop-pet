@@ -20,6 +20,14 @@ import {
   type PetStats,
 } from '../features/pet/pet.stats';
 import type { PetStateName } from '../features/pet/pet.types';
+import { getManifest } from '../features/pet-library/services/pet-asset-loader';
+import { randomDialogueLine } from '../features/pet-library/services/pet-dialogue';
+import { resolveActivePetId } from '../features/pet-library/services/pet-library.service';
+import {
+  DEFAULT_PET_ID,
+  type ActivePetChangedPayload,
+  type PetDialogue,
+} from '../features/pet-library/types/pet-library.types';
 import { playSound, setMuted, syncMuteFromPreferences } from '../services/sound/sound';
 import { getPreference } from '../services/storage/preferences';
 import {
@@ -51,6 +59,7 @@ export default function App() {
   const petState = state.value as PetStateName;
 
   const [service, setService] = useState<PetStatsService | null>(null);
+  const [activePetId, setActivePetId] = useState(DEFAULT_PET_ID);
   const [stats, setStats] = useState<PetStats | null>(null);
   const [mood, setMood] = useState('content');
   const [petName, setPetName] = useState('CacheWraith');
@@ -66,6 +75,7 @@ export default function App() {
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const dragActive = useRef(false);
   const moveDebounce = useRef<number | null>(null);
+  const dialogueRef = useRef<PetDialogue | undefined>(undefined);
   const sendRef = useRef(send);
   useEffect(() => {
     sendRef.current = send;
@@ -114,6 +124,10 @@ export default function App() {
         );
         bubbleDuration.current = await getPreference('speechBubbleDurationMs');
 
+        const petId = await resolveActivePetId();
+        setActivePetId(petId);
+        dialogueRef.current = getManifest(petId)?.dialogue;
+
         statsService = await PetStatsService.create();
         if (disposed) return;
         setService(statsService);
@@ -158,7 +172,13 @@ export default function App() {
     ) {
       send({ type: 'BECOME_HUNGRY' });
       // Defer the bubble so the effect itself does not set state synchronously.
-      window.setTimeout(() => showBubble('My ectoplasm is rumbling… 🍬'), 0);
+      window.setTimeout(
+        () =>
+          showBubble(
+            randomDialogueLine(dialogueRef.current, 'hungry', 'My ectoplasm is rumbling… 🍬')
+          ),
+        0
+      );
     } else if (stats.energy <= SLEEPY_ENERGY_THRESHOLD && petState === 'idle') {
       send({ type: 'BECOME_SLEEPY' });
     }
@@ -167,7 +187,7 @@ export default function App() {
   // ---- Interactions ----
   const feed = useCallback(() => {
     send({ type: 'FEED' });
-    showBubble('Nom nom… ✨');
+    showBubble(randomDialogueLine(dialogueRef.current, 'fed', 'Nom nom… ✨'));
     void service?.feed();
   }, [send, service, showBubble]);
 
@@ -231,6 +251,21 @@ export default function App() {
         if (service) {
           const profile = await service.refreshProfile();
           setPetName(profile.name);
+        }
+      }),
+      listen<ActivePetChangedPayload>(AppEvents.activePetChanged, (event) => {
+        const petId = event.payload?.petId;
+        if (typeof petId === 'string' && petId) {
+          setActivePetId(petId);
+          dialogueRef.current = getManifest(petId)?.dialogue;
+          const manifest = getManifest(petId);
+          showBubble(
+            randomDialogueLine(
+              manifest?.dialogue,
+              'greeting',
+              `${manifest?.name ?? 'A new friend'} is here!`
+            )
+          );
         }
       }),
     ];
@@ -299,7 +334,13 @@ export default function App() {
         showBubble('Hm? Oh, hello!');
       } else {
         petThePet();
-        showBubble(CLICK_REACTIONS[Math.floor(Math.random() * CLICK_REACTIONS.length)]);
+        showBubble(
+          randomDialogueLine(
+            dialogueRef.current,
+            'clicked',
+            CLICK_REACTIONS[Math.floor(Math.random() * CLICK_REACTIONS.length)]
+          )
+        );
       }
     }, SINGLE_CLICK_DELAY_MS);
   }, [petState, petThePet, send, showBubble]);
@@ -358,6 +399,7 @@ export default function App() {
       >
         <SpeechBubble text={bubble} />
         <PetCanvas
+          petId={activePetId}
           petState={petState}
           reducedMotion={reducedMotion}
           width={PET_WINDOW_SIZE.width}

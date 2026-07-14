@@ -1,0 +1,143 @@
+{
+  "id": "cachewraith",
+  "number": 1,
+  "name": "CacheWraith",
+  "slug": "cachewraith",
+  "description": "A friendly purple cache ghost that haunts your taskbar.",
+  "lore": "Born in a forgotten browser cache, CacheWraith chose companionship over hauntings. It tidies stray bits while you work.",
+  "personality": "Playful, supportive and a little mischievous.",
+  "category": "ghost",
+  "rarity": "common",
+  "tags": ["ghost", "classic", "starter"],
+  "featured": true,
+  "new": false,
+  "free": true,
+  "defaultUnlocked": true,
+  "thumbnail": "thumbnail.png",
+  "animations": {
+    "idle": {
+      "name": "idle",
+      "asset": "sprites/idle.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "walk": {
+      "name": "walk",
+      "asset": "sprites/walk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sleep": {
+      "name": "sleep",
+      "asset": "sprites/sleep.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 3,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "happy": {
+      "name": "happy",
+      "asset": "sprites/happy.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sad": {
+      "name": "sad",
+      "asset": "sprites/sad.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 4,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "hungry": {
+      "name": "hungry",
+      "asset": "sprites/hungry.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "eat": {
+      "name": "eat",
+      "asset": "sprites/eat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 7,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "talk": {
+      "name": "talk",
+      "asset": "sprites/talk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "celebrate": {
+      "name": "celebrate",
+      "asset": "sprites/celebrate.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 8,
+      "frameRate": 9,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    }
+  },
+  "effects": {
+    "celebrationParticle": "spark",
+    "particleColors": ["#9d8cff", "#4fd8ff", "#ffd166"],
+    "glowColor": "#4fd8ff",
+    "idleFloatAmount": 4,
+    "idleFloatSpeed": 1.4
+  },
+  "dialogue": {
+    "greeting": ["I'm awake. What are we building today?", "Boo! …Sorry, ghost habits."],
+    "clicked": ["Boo! 👻", "The cache spirits approve.", "You've got this."],
+    "hungry": ["My ectoplasm is rumbling…", "A byte-sized snack would be lovely."],
+    "fed": ["Nom nom… ✨", "Delicious data!"],
+    "happy": ["Cozy taskbar, best taskbar.", "Hehe~"],
+    "sleeping": ["zzz… defragmenting dreams…"],
+    "celebrating": ["Cache cleared! Confetti time!"]
+  }
+}

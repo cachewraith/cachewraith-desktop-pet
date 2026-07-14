@@ -11,14 +11,16 @@ import { DataSection } from '../components/settings/DataSection';
 import { GeneralSection } from '../components/settings/GeneralSection';
 import { Onboarding } from '../components/settings/Onboarding';
 import { PetSection } from '../components/settings/PetSection';
+import { PetLibrarySection } from '../features/pet-library/components/PetLibrarySection';
 import { getPreference } from '../services/storage/preferences';
 import { AppEvents } from '../types/events';
 
-type SectionName = 'general' | 'pet' | 'ai' | 'data' | 'about';
+type SectionName = 'general' | 'pet' | 'library' | 'ai' | 'data' | 'about';
 
 const SECTIONS: { id: SectionName; label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'pet', label: 'Pet' },
+  { id: 'library', label: 'Pet Library' },
   { id: 'ai', label: 'AI' },
   { id: 'data', label: 'Data' },
   { id: 'about', label: 'About' },
@@ -74,6 +76,7 @@ export default function SettingsApp() {
       <div className="settings-content">
         {section === 'general' && <GeneralSection />}
         {section === 'pet' && <PetSection />}
+        {section === 'library' && <PetLibrarySection />}
         {section === 'ai' && <AiSection />}
         {section === 'data' && <DataSection />}
         {section === 'about' && <AboutSection />}

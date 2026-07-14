@@ -33,3 +33,13 @@ pub fn reset_pet_position(app: AppHandle) -> Result<WindowPos, String> {
 pub fn get_shortcut_status(app: AppHandle) -> crate::shortcuts::ShortcutStatus {
     crate::shortcuts::status(&app)
 }
+
+/// Update the tray tooltip to the active character's name.
+#[tauri::command]
+pub fn set_tray_tooltip(app: AppHandle, tooltip: String) -> Result<(), String> {
+    let trimmed: String = tooltip.chars().take(60).collect();
+    match app.tray_by_id("cachewraith-tray") {
+        Some(tray) => tray.set_tooltip(Some(trimmed)).map_err(|e| e.to_string()),
+        None => Err("tray icon not found".to_string()),
+    }
+}

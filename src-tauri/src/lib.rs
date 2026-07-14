@@ -11,12 +11,20 @@ use tauri::WindowEvent;
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 fn migrations() -> Vec<Migration> {
-    vec![Migration {
-        version: 1,
-        description: "create initial tables",
-        sql: include_str!("../migrations/0001_init.sql"),
-        kind: MigrationKind::Up,
-    }]
+    vec![
+        Migration {
+            version: 1,
+            description: "create initial tables",
+            sql: include_str!("../migrations/0001_init.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "pet characters and active pet",
+            sql: include_str!("../migrations/0002_pet_characters.sql"),
+            kind: MigrationKind::Up,
+        },
+    ]
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -44,6 +52,7 @@ pub fn run() {
             commands::apply_saved_position,
             commands::reset_pet_position,
             commands::get_shortcut_status,
+            commands::set_tray_tooltip,
             ai::ai_set_api_key,
             ai::ai_has_api_key,
             ai::ai_clear_api_key,

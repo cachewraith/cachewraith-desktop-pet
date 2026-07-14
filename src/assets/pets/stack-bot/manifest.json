@@ -1,0 +1,146 @@
+{
+  "id": "stack-bot",
+  "number": 5,
+  "name": "StackBot",
+  "slug": "stack-bot",
+  "description": "A tiny orange utility robot with status lights.",
+  "lore": "Assembled from leftover CI runners, StackBot lives to help. Its lights blink green when your builds pass.",
+  "personality": "Precise, earnest and secretly sentimental.",
+  "category": "robot",
+  "rarity": "uncommon",
+  "tags": ["robot", "utility", "starter"],
+  "featured": false,
+  "new": true,
+  "free": true,
+  "defaultUnlocked": true,
+  "thumbnail": "thumbnail.png",
+  "animations": {
+    "idle": {
+      "name": "idle",
+      "asset": "sprites/idle.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "walk": {
+      "name": "walk",
+      "asset": "sprites/walk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sleep": {
+      "name": "sleep",
+      "asset": "sprites/sleep.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 3,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "happy": {
+      "name": "happy",
+      "asset": "sprites/happy.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sad": {
+      "name": "sad",
+      "asset": "sprites/sad.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 4,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "hungry": {
+      "name": "hungry",
+      "asset": "sprites/hungry.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "eat": {
+      "name": "eat",
+      "asset": "sprites/eat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 7,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "talk": {
+      "name": "talk",
+      "asset": "sprites/talk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "celebrate": {
+      "name": "celebrate",
+      "asset": "sprites/celebrate.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 8,
+      "frameRate": 9,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    }
+  },
+  "effects": {
+    "celebrationParticle": "pixel",
+    "particleColors": ["#20e0a0", "#f0a050", "#4fd8ff"],
+    "glowColor": "#20e0a0",
+    "idleFloatAmount": 0,
+    "idleFloatSpeed": 1
+  },
+  "dialogue": {
+    "greeting": ["StackBot online. All systems nominal.", "Boot complete. Hello, operator."],
+    "clicked": ["Interaction logged. Warmth levels rising.", "Beep! (that means thank you)"],
+    "hungry": [
+      "Fuel cells at 12%. Requesting snacks.",
+      "Energy low. Deploying puppy-eye subroutine."
+    ],
+    "fed": ["Recharging… delicious.", "Fuel accepted. Efficiency +8%."],
+    "happy": ["Status lights: all green!", "Emotional subroutines report: joy."],
+    "sleeping": ["Entering low-power mode… zzz…"],
+    "celebrating": ["BUILD PASSED! Confetti protocol engaged!"]
+  }
+}

@@ -13,6 +13,7 @@ export const AppEvents = {
   autostartChanged: 'cachewraith://autostart-changed',
   petStateChanged: 'cachewraith://pet-state-changed',
   petProfileChanged: 'cachewraith://pet-profile-changed',
+  activePetChanged: 'cachewraith://active-pet-changed',
 } as const;
 
 export type AppEventName = (typeof AppEvents)[keyof typeof AppEvents];

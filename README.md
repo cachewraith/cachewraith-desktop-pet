@@ -26,7 +26,7 @@ with you, either fully offline or powered by your own OpenAI API key.
 - Compact chat panel with history; works fully offline with local fallback replies
 - Optional OpenAI integration (Responses API) — the key is stored in the
   **Windows Credential Manager**, never in files, code or the database
-- Settings window: General, Pet, AI, Data (JSON export/import) and About
+- Settings window: General, Pet, Pet Library, AI, Data (JSON export/import) and About
 - First-run onboarding, optional notifications, tiny generated sound effects
 - Start-with-Windows via the official Tauri autostart plugin
 
@@ -125,6 +125,64 @@ it never fakes an AI response.
 
 `%APPDATA%\com.cachewraith.desktoppet\cachewraith.db` (shown precisely in Settings → Data).
 Preferences live next to it in `preferences.json`.
+
+## Creating Custom Pets
+
+Built-in pets live in `src/assets/pets/<pet-slug>/`. Each character has a `manifest.json`, a
+`thumbnail.png`, and horizontal PNG frame strips in `sprites/`. The renderer validates manifests
+before loading them, and falls back to the bundled CacheWraith character if an asset is invalid.
+
+| Built-in pet | Category | Rarity |
+| --- | --- | --- |
+| CacheWraith | Ghost | Common |
+| ByteBunny | Animal | Common |
+| NullCat | Animal | Rare |
+| PingPup | Animal | Common |
+| StackBot | Robot | Uncommon |
+| GlitchSlime | Slime | Rare |
+| EmberFox | Elemental | Epic |
+| MossMunch | Nature | Uncommon |
+| LunarMoth | Fantasy | Epic |
+| OrbitOrb | Space | Rare |
+| FrostFang | Elemental | Epic |
+| RuneOwl | Fantasy | Legendary |
+
+### Folder and manifest
+
+```text
+src/assets/pets/my-pet/
+├── manifest.json
+├── thumbnail.png
+└── sprites/
+    ├── idle.png
+    ├── walk.png
+    ├── sleep.png
+    ├── happy.png
+    ├── sad.png
+    ├── hungry.png
+    ├── eat.png
+    ├── talk.png
+    └── celebrate.png
+```
+
+Copy an existing `manifest.json` as the template. Give the pet a unique `id`, matching folder
+`slug`, number, description, category, rarity, dialogue arrays, and an animation entry for every
+required state. Each sprite sheet is a single horizontal row of equally sized frames; the manifest
+declares `frameWidth`, `frameHeight`, `frameCount`, and `frameRate`. Built-ins use 32×32 pixel
+frames and scale them by whole-number factors. Keep transparent backgrounds, hard pixel edges,
+and use nearest-neighbor scaling—never blurred interpolation.
+
+The required animations are `idle`, `walk`, `sleep`, `happy`, `sad`, `hungry`, `eat`, `talk`, and
+`celebrate`. Missing files safely fall back to idle and then CacheWraith, but a complete custom pet
+should provide all nine. Optional visual effects and dialogue are documented by the matching
+built-in manifests. Test a new pet with `npm run typecheck`, `npm run build`, and by selecting it
+from Pet Library. Built-in additions also need a migration seed row in
+`src-tauri/migrations/0002_pet_characters.sql` (or a newer migration) so unlock/favorite state is
+persisted.
+
+Only add artwork you own or are licensed to distribute. Imported packs must contain data and PNG
+assets only: reject executable code, remote URLs, misleading copyrighted characters, and malformed
+or oversized sprite files.
 
 ## Autostart
 

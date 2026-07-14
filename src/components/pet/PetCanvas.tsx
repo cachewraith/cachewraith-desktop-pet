@@ -1,29 +1,31 @@
 /**
  * Pixi host component. The Application is created exactly once per mount;
- * animation is driven entirely by the Pixi ticker, never by React renders.
+ * character switches swap textures inside the single PixelPetController.
+ * Animation is driven entirely by the Pixi ticker, never by React renders.
  */
 import { useEffect, useRef } from 'react';
 import { Application, Ticker } from 'pixi.js';
 
 import type { PetStateName } from '../../features/pet/pet.types';
 import { logger } from '../../utils/logger';
-import { GhostPet } from './ghost';
+import { PixelPetController } from './pixelPet';
 
 interface PetCanvasProps {
+  petId: string;
   petState: PetStateName;
   reducedMotion: boolean;
   width: number;
   height: number;
 }
 
-export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasProps) {
+export function PetCanvas({ petId, petState, reducedMotion, width, height }: PetCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const ghostRef = useRef<GhostPet | null>(null);
+  const controllerRef = useRef<PixelPetController | null>(null);
   const appRef = useRef<Application | null>(null);
-  const latestProps = useRef({ petState, reducedMotion });
+  const latestProps = useRef({ petId, petState, reducedMotion });
   useEffect(() => {
-    latestProps.current = { petState, reducedMotion };
-  }, [petState, reducedMotion]);
+    latestProps.current = { petId, petState, reducedMotion };
+  }, [petId, petState, reducedMotion]);
 
   // Create the Pixi application once.
   useEffect(() => {
@@ -39,7 +41,7 @@ export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasP
           width,
           height,
           backgroundAlpha: 0,
-          antialias: true,
+          antialias: false,
           autoDensity: true,
           resolution: window.devicePixelRatio || 1,
         });
@@ -54,15 +56,16 @@ export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasP
       appRef.current = app;
       host.appendChild(app.canvas);
 
-      const ghost = new GhostPet(width / 2, height - 70);
-      ghostRef.current = ghost;
-      app.stage.addChild(ghost);
+      const controller = new PixelPetController(width / 2, height - 24);
+      controllerRef.current = controller;
+      app.stage.addChild(controller);
       // Apply any props that changed while the renderer was initializing.
-      ghost.setPetState(latestProps.current.petState);
-      ghost.setReducedMotion(latestProps.current.reducedMotion);
+      controller.setReducedMotion(latestProps.current.reducedMotion);
+      controller.setPetState(latestProps.current.petState);
+      void controller.setCharacter(latestProps.current.petId);
 
       app.ticker.add((ticker: Ticker) => {
-        ghost.update(ticker.deltaMS / 1000);
+        controller.update(ticker.deltaMS / 1000);
       });
     })();
 
@@ -70,9 +73,9 @@ export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasP
       destroyed = true;
       const currentApp = appRef.current;
       appRef.current = null;
-      if (ghostRef.current) {
-        ghostRef.current.destroyPet();
-        ghostRef.current = null;
+      if (controllerRef.current) {
+        controllerRef.current.destroyController();
+        controllerRef.current = null;
       }
       if (currentApp) {
         currentApp.destroy(true, { children: true });
@@ -82,9 +85,14 @@ export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Push state changes into the ghost without re-creating anything.
+  // Character swap without recreating the Application.
   useEffect(() => {
-    ghostRef.current?.setPetState(petState);
+    void controllerRef.current?.setCharacter(petId);
+  }, [petId]);
+
+  // Push state changes into the controller without re-creating anything.
+  useEffect(() => {
+    controllerRef.current?.setPetState(petState);
     const app = appRef.current;
     if (app) {
       // Pause rendering entirely while hidden to save CPU.
@@ -97,7 +105,7 @@ export function PetCanvas({ petState, reducedMotion, width, height }: PetCanvasP
   }, [petState]);
 
   useEffect(() => {
-    ghostRef.current?.setReducedMotion(reducedMotion);
+    controllerRef.current?.setReducedMotion(reducedMotion);
   }, [reducedMotion]);
 
   return <div ref={hostRef} className="pet-canvas" aria-hidden="true" />;

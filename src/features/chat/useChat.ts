@@ -7,7 +7,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiServiceError, hasApiKey, sendChat, type AiChatMessage } from '../../services/ai/ai';
 import { getPreference } from '../../services/storage/preferences';
 import { logger } from '../../utils/logger';
-import { randomFallbackResponse } from './fallback';
+import { getManifest } from '../pet-library/services/pet-asset-loader';
+import { pickPetChatFallback } from '../pet-library/services/pet-dialogue';
+import { buildPetIdentity, resolveActivePetId } from '../pet-library/services/pet-library.service';
 import {
   clearConversation,
   getOrCreateConversation,
@@ -108,15 +110,19 @@ export function useChat(options: UseChatOptions = {}): UseChatResult {
         const keyAvailable = aiEnabled ? await hasApiKey().catch(() => false) : false;
 
         let reply: string;
+        // Resolve at send time so a companion chosen moments ago is reflected
+        // in both local dialogue and the optional AI system context.
+        const activePet = getManifest(await resolveActivePetId());
         if (aiEnabled && keyAvailable) {
           const model = await getPreference('aiModel');
-          const personality = await getPreference('aiPersonality');
+          const personality =
+            `${await getPreference('aiPersonality')}\n\n${buildPetIdentity(activePet)}`.trim();
           const history: AiChatMessage[] = [...state.messages, userMessage]
             .slice(-CONTEXT_MESSAGES)
             .map((m) => ({ role: m.role, content: m.content }));
           reply = await sendChat(model, personality, history);
         } else {
-          reply = randomFallbackResponse(content);
+          reply = pickPetChatFallback(activePet?.dialogue, content, Math.floor(Math.random() * 16));
         }
 
         // A newer send superseded this one; drop the stale reply.

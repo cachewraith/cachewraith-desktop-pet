@@ -1,0 +1,150 @@
+{
+  "id": "rune-owl",
+  "number": 12,
+  "name": "RuneOwl",
+  "slug": "rune-owl",
+  "description": "A magical owl inscribed with softly glowing runes.",
+  "lore": "RuneOwl studied at the great Library of Deprecated Docs. It knows answers to questions not yet asked.",
+  "personality": "Wise, warm and delightfully cryptic.",
+  "category": "fantasy",
+  "rarity": "legendary",
+  "tags": ["owl", "magic", "runes"],
+  "featured": true,
+  "new": true,
+  "free": true,
+  "defaultUnlocked": false,
+  "thumbnail": "thumbnail.png",
+  "animations": {
+    "idle": {
+      "name": "idle",
+      "asset": "sprites/idle.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "walk": {
+      "name": "walk",
+      "asset": "sprites/walk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sleep": {
+      "name": "sleep",
+      "asset": "sprites/sleep.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 3,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "happy": {
+      "name": "happy",
+      "asset": "sprites/happy.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "sad": {
+      "name": "sad",
+      "asset": "sprites/sad.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 4,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "hungry": {
+      "name": "hungry",
+      "asset": "sprites/hungry.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 4,
+      "frameRate": 5,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "eat": {
+      "name": "eat",
+      "asset": "sprites/eat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 7,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "talk": {
+      "name": "talk",
+      "asset": "sprites/talk.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 6,
+      "frameRate": 8,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "celebrate": {
+      "name": "celebrate",
+      "asset": "sprites/celebrate.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 8,
+      "frameRate": 9,
+      "loop": true,
+      "scale": 5,
+      "anchorX": 0.5,
+      "anchorY": 1
+    }
+  },
+  "effects": {
+    "celebrationParticle": "spark",
+    "particleColors": ["#ffd166", "#b8a8ff", "#4fd8ff"],
+    "glowColor": "#b8a8ff",
+    "idleFloatAmount": 2,
+    "idleFloatSpeed": 1
+  },
+  "dialogue": {
+    "greeting": [
+      "Hoo. You arrive precisely when expected.",
+      "The runes foretold a productive day."
+    ],
+    "clicked": [
+      "*runes pulse warmly*",
+      "Hoo hoo. Wisdom appreciates attention.",
+      "You seek… head pats. Granted."
+    ],
+    "hungry": ["Even ancient wisdom requires snacks.", "The prophecy speaks of… dinner."],
+    "fed": ["*hoots gratefully*", "A feast worthy of the old library."],
+    "happy": ["The runes glow brighter today.", "Hoo! Joy is the oldest magic."],
+    "sleeping": ["zzz… *dreams in forgotten languages*"],
+    "celebrating": ["*runes flare in triumphant gold!*"]
+  }
+}
