@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capabilities for the CacheWraith pet and settings windows",
-  "windows": ["pet", "settings"],
+  "description": "Capabilities for the CacheWraith pet, companion and settings windows",
+  "windows": ["pet", "settings", "companion-*"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
@@ -10,8 +10,10 @@
     "core:window:allow-set-size",
     "core:window:allow-show",
     "core:window:allow-hide",
+    "core:window:allow-close",
     "core:window:allow-set-focus",
     "core:window:allow-center",
+    "core:webview:allow-create-webview-window",
     "opener:allow-open-url",
     "sql:default",
     "sql:allow-execute",

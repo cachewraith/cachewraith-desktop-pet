@@ -15,8 +15,11 @@ export type PetEvent =
   | { type: 'FEED' }
   | { type: 'FINISH_EATING' }
   | { type: 'PET_CLICKED' }
+  | { type: 'SLAP' }
   | { type: 'CHAT_STARTED' }
   | { type: 'CHAT_FINISHED' }
+  | { type: 'TYPING_START' }
+  | { type: 'TYPING_STOP' }
   | { type: 'CELEBRATE' }
   | { type: 'DRAG_START' }
   | { type: 'DRAG_END' }
@@ -43,9 +46,14 @@ export const petMachine = setup({
     sleepDelay: () => Math.round(randomBetween(120_000, 240_000)),
     happyDuration: 2_500,
     sadDuration: 5_000,
-    eatingDuration: 2_200,
+    // Matches EAT_LOOP_MS in sound.ts so the munching clip and the eating
+    // animation end together.
+    eatingDuration: 3_000,
     celebrateDuration: 3_000,
     hungrySulkDelay: 45_000,
+    // Safety net: the window normally sends TYPING_STOP ~2s after the last
+    // keystroke; this catches a stop event that never arrives.
+    typingTimeout: 10_000,
   },
 }).createMachine({
   id: 'pet',
@@ -69,7 +77,9 @@ export const petMachine = setup({
           target: 'happy',
           actions: assign({ clickCount: ({ context }) => context.clickCount + 1 }),
         },
+        SLAP: 'sad',
         CHAT_STARTED: 'talking',
+        TYPING_START: 'typing',
         CELEBRATE: 'celebrating',
         IDLE_TIMEOUT: 'sleeping',
       },
@@ -82,8 +92,10 @@ export const petMachine = setup({
       on: {
         STOP_WALKING: 'idle',
         PET_CLICKED: 'happy',
+        SLAP: 'sad',
         FEED: 'eating',
         CHAT_STARTED: 'talking',
+        TYPING_START: 'typing',
         BECOME_SLEEPY: 'sleeping',
       },
       after: { walkDuration: 'idle' },
@@ -92,6 +104,7 @@ export const petMachine = setup({
       on: {
         WAKE_UP: 'idle',
         PET_CLICKED: 'idle',
+        SLAP: 'sad',
         FEED: 'eating',
         CHAT_STARTED: 'talking',
       },
@@ -100,6 +113,7 @@ export const petMachine = setup({
       on: {
         CELEBRATE: 'celebrating',
         CHAT_STARTED: 'talking',
+        SLAP: 'sad',
         FEED: 'eating',
       },
       after: { happyDuration: 'idle' },
@@ -107,6 +121,7 @@ export const petMachine = setup({
     sad: {
       on: {
         PET_CLICKED: 'happy',
+        SLAP: 'sad',
         FEED: 'eating',
         CHAT_STARTED: 'talking',
       },
@@ -116,6 +131,7 @@ export const petMachine = setup({
       on: {
         FEED: 'eating',
         PET_CLICKED: 'hungry',
+        SLAP: 'sad',
         CHAT_STARTED: 'talking',
       },
       after: { hungrySulkDelay: 'sad' },
@@ -130,6 +146,18 @@ export const petMachine = setup({
         CELEBRATE: 'celebrating',
         FEED: 'eating',
       },
+    },
+    typing: {
+      on: {
+        TYPING_STOP: 'idle',
+        PET_CLICKED: 'happy',
+        SLAP: 'sad',
+        FEED: 'eating',
+        CHAT_STARTED: 'talking',
+        BECOME_SLEEPY: 'sleeping',
+        CELEBRATE: 'celebrating',
+      },
+      after: { typingTimeout: 'idle' },
     },
     celebrating: {
       after: { celebrateDuration: 'idle' },

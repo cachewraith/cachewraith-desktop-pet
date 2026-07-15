@@ -26,6 +26,9 @@ keyring = { version = "3", features = ["windows-native"] }
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2"
 tauri-plugin-global-shortcut = "2"
+# Keyboard-activity polling for the "pet types along" reaction. Only
+# whether keys are down is read; key identities are never stored or sent.
+device_query = "2"
 
 [profile.release]
 codegen-units = 1

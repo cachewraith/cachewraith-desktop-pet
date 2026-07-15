@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { emit } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 
 import { getAutostartEnabled, setAutostartEnabled } from '../../services/autostart/autostart';
+import { playSound, setVolume } from '../../services/sound/sound';
 import { formatAccelerator, getShortcutStatus } from '../../services/shortcuts/shortcuts';
 import type { ShortcutStatus } from '../../services/shortcuts/shortcuts';
 import {
@@ -17,21 +18,48 @@ import { logger } from '../../utils/logger';
 export function GeneralSection() {
   const [autostart, setAutostart] = useState(false);
   const [sound, setSound] = useState(true);
+  const [volume, setVolumeState] = useState(70);
   const [reducedMotion, setReducedMotionPref] = useState(false);
   const [theme, setTheme] = useState<ThemeName>('system');
   const [petSize, setPetSize] = useState<PetSizeName>('medium');
   const [shortcut, setShortcut] = useState<ShortcutStatus | null>(null);
+  const [petVisible, setPetVisible] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       setAutostart(await getAutostartEnabled());
       setSound(await getPreference('soundEnabled'));
+      const savedVolume = await getPreference('soundVolume');
+      setVolumeState(savedVolume);
+      setVolume(savedVolume);
       setReducedMotionPref(await getPreference('reducedMotion'));
       setTheme(await getPreference('theme'));
       setPetSize(await getPreference('petSize'));
       setShortcut(await getShortcutStatus());
     })();
+  }, []);
+
+  // Track pet visibility so the toggle button stays accurate even when the
+  // pet is shown/hidden via the tray or the global shortcut.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+        const pet = await WebviewWindow.getByLabel('pet');
+        if (pet && !cancelled) setPetVisible(await pet.isVisible());
+      } catch (error) {
+        logger.error('settings', 'read pet visibility failed', error);
+      }
+    })();
+    const unlistenShow = listen(AppEvents.showPet, () => setPetVisible(true));
+    const unlistenHide = listen(AppEvents.hidePet, () => setPetVisible(false));
+    return () => {
+      cancelled = true;
+      void unlistenShow.then((fn) => fn());
+      void unlistenHide.then((fn) => fn());
+    };
   }, []);
 
   const toggleAutostart = async (wanted: boolean) => {
@@ -52,6 +80,14 @@ export function GeneralSection() {
     setSound(enabled);
     await setPreference('soundEnabled', enabled);
     await emit(AppEvents.toggleMute, enabled);
+  };
+
+  const changeVolume = async (value: number) => {
+    setVolumeState(value);
+    setVolume(value); // keep the settings window's own synth in sync for the preview
+    await setPreference('soundVolume', value);
+    await emit(AppEvents.soundVolumeChanged, value);
+    if (sound) playSound('happy'); // audible preview at the new volume
   };
 
   const toggleReducedMotion = async (enabled: boolean) => {
@@ -82,11 +118,12 @@ export function GeneralSection() {
     }
   };
 
-  const showHidePet = async (show: boolean) => {
+  const togglePetVisibility = async () => {
     try {
       const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
       const pet = await WebviewWindow.getByLabel('pet');
       if (!pet) return;
+      const show = !(await pet.isVisible());
       if (show) {
         await pet.show();
         await emit(AppEvents.showPet, null);
@@ -94,8 +131,9 @@ export function GeneralSection() {
         await pet.hide();
         await emit(AppEvents.hidePet, null);
       }
+      setPetVisible(show);
     } catch (error) {
-      logger.error('settings', 'show/hide pet failed', error);
+      logger.error('settings', 'toggle pet visibility failed', error);
     }
   };
 
@@ -119,6 +157,21 @@ export function GeneralSection() {
           onChange={(e) => void toggleSound(e.target.checked)}
         />
         <span>Sound effects</span>
+      </label>
+
+      <label className="setting-row">
+        <span>Volume</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={volume}
+          disabled={!sound}
+          onChange={(e) => void changeVolume(Number(e.target.value))}
+          aria-label="Sound volume"
+        />
+        <span className="setting-value">{volume}%</span>
       </label>
 
       <label className="setting-row">
@@ -166,11 +219,8 @@ export function GeneralSection() {
         <button type="button" onClick={() => void resetPosition()}>
           Reset pet position
         </button>
-        <button type="button" onClick={() => void showHidePet(true)}>
-          Show pet
-        </button>
-        <button type="button" onClick={() => void showHidePet(false)}>
-          Hide pet
+        <button type="button" onClick={() => void togglePetVisibility()}>
+          {petVisible ? 'Hide pet' : 'Show pet'}
         </button>
       </div>
 

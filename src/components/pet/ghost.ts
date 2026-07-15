@@ -16,6 +16,11 @@ const EYE_COLOR = 0x2b1b4d;
 const BLUSH_COLOR = 0xff9ad5;
 const MOUTH_COLOR = 0x2b1b4d;
 const STAR_COLORS = [0x9d8cff, 0x4fd8ff, 0xffd166, 0xff9ad5];
+const HOODIE_COLOR = 0x1e2338;
+const HOODIE_EDGE = 0x12162a;
+const HOODIE_POCKET = 0x272d4a;
+const HOODIE_STRING = 0xaab6e0;
+const HOODIE_STITCH = 0x7ef9a2;
 
 const BODY_W = 120;
 const BODY_H = 130;
@@ -47,6 +52,48 @@ function drawBody(g: Graphics): void {
   g.stroke({ color: BODY_EDGE, width: 3, alpha: 0.7 });
 }
 
+/**
+ * Hacker hoodie worn while typing: a dark hood pulled up around the face,
+ * a torso with a kangaroo pocket and hem, and dangling drawstrings. The
+ * face opening is refilled with the body color so the hood reads as worn
+ * over the head rather than pasted on top.
+ */
+function drawHoodie(hoodie: Container): void {
+  const hood = new Graphics();
+  hood.moveTo(-66, -16);
+  hood.bezierCurveTo(-66, -126, 66, -126, 66, -16);
+  hood.closePath();
+  hood.fill({ color: HOODIE_COLOR });
+  hood.stroke({ color: HOODIE_EDGE, width: 3, alpha: 0.85 });
+  hood.ellipse(0, -56, 42, 33).fill({ color: BODY_COLOR });
+  hood.ellipse(0, -56, 42, 33).stroke({ color: HOODIE_STITCH, width: 2, alpha: 0.35 });
+
+  const torso = new Graphics();
+  torso.moveTo(-62, -20);
+  torso.lineTo(62, -20);
+  torso.lineTo(60, 26);
+  torso.quadraticCurveTo(0, 32, -60, 26);
+  torso.closePath();
+  torso.fill({ color: HOODIE_COLOR });
+  torso.stroke({ color: HOODIE_EDGE, width: 3, alpha: 0.85 });
+  // Ribbed hem.
+  torso.moveTo(-60, 20).quadraticCurveTo(0, 26, 60, 20);
+  torso.stroke({ color: HOODIE_EDGE, width: 3, alpha: 0.7 });
+
+  const pocket = new Graphics();
+  pocket.roundRect(-24, -6, 48, 20, 5).fill({ color: HOODIE_POCKET });
+  pocket.roundRect(-24, -6, 48, 20, 5).stroke({ color: HOODIE_EDGE, width: 2, alpha: 0.8 });
+
+  const strings = new Graphics();
+  for (const side of [-1, 1]) {
+    strings.moveTo(side * 15, -26).quadraticCurveTo(side * 17, -14, side * 13, -2);
+    strings.stroke({ color: HOODIE_STRING, width: 2.5, cap: 'round' });
+    strings.circle(side * 13, 0, 2.5).fill({ color: HOODIE_STRING });
+  }
+
+  hoodie.addChild(hood, torso, pocket, strings);
+}
+
 function drawStar(g: Graphics, color: number): void {
   const spikes = 4;
   const outer = 6;
@@ -67,6 +114,7 @@ function drawStar(g: Graphics, color: number): void {
 export class GhostPet extends Container {
   private readonly glow = new Graphics();
   private readonly body = new Graphics();
+  private readonly hoodie = new Container();
   private readonly face = new Container();
   private readonly leftEye = new Graphics();
   private readonly rightEye = new Graphics();
@@ -103,6 +151,10 @@ export class GhostPet extends Container {
     this.body.pivot.set(0, 0);
     this.body.position.set(0, 0);
     this.addChild(this.body);
+
+    drawHoodie(this.hoodie);
+    this.hoodie.visible = false;
+    this.addChild(this.hoodie);
 
     this.leftEye.ellipse(0, 0, 8, 11).fill(EYE_COLOR);
     this.leftEye.circle(2.5, -3.5, 2.6).fill({ color: 0xffffff, alpha: 0.9 });
@@ -146,6 +198,7 @@ export class GhostPet extends Container {
     if (this.state === state) return;
     this.state = state;
     this.drawMouthFor(state);
+    this.hoodie.visible = state === 'typing';
     if (state === 'celebrating' && !this.reducedMotion) {
       this.burstStars(14);
     }
@@ -270,6 +323,11 @@ export class GhostPet extends Container {
         this.mouth.scale.y = 0.4 + Math.abs(Math.sin(t * 7)) * 0.7;
         targetY += calm ? 0 : Math.sin(t * 2.2) * 4;
         break;
+      case 'typing':
+        // Quick little bobs, like tapping away at the keys.
+        targetY += calm ? 0 : Math.sin(t * 9) * 2;
+        bodyRotation = calm ? 0 : Math.sin(t * 4.5) * 0.02;
+        break;
       case 'celebrating':
         targetY += calm ? -4 : -Math.abs(Math.sin(t * 7)) * 18;
         bodyRotation = calm ? 0 : Math.sin(t * 9) * 0.08;
@@ -300,6 +358,9 @@ export class GhostPet extends Container {
     this.body.rotation += (bodyRotation - this.body.rotation) * ease;
     this.face.rotation = this.body.rotation;
     this.body.scale.y += (bodyScaleY - this.body.scale.y) * ease;
+    // The hoodie is worn on the body, so it follows the same sway.
+    this.hoodie.rotation = this.body.rotation;
+    this.hoodie.scale.y = this.body.scale.y;
 
     // Glow pulse.
     this.glow.alpha = calm ? 0.9 : 0.75 + Math.sin(t * 1.1) * 0.25;

@@ -224,9 +224,75 @@ kbd {
 .library-toolbar {
   margin-bottom: 12px;
 }
-.library-toolbar input {
+.setting-row input[type='range'] {
+  flex: 1 1 140px;
+  min-width: 80px;
+  accent-color: var(--cw-purple);
+}
+.setting-value {
+  min-width: 44px;
+  text-align: right;
+  color: var(--cw-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.library-search {
+  position: relative;
+  display: flex;
+  align-items: center;
   flex: 1 1 220px;
   min-width: 0;
+}
+.library-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 30px;
+  border-radius: 999px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.library-search input::placeholder {
+  color: var(--cw-text-dim);
+  opacity: 0.7;
+}
+.library-search input:focus-visible {
+  outline: none;
+  border-color: var(--cw-purple);
+  box-shadow: 0 0 0 3px rgba(157, 140, 255, 0.25);
+}
+.library-search:focus-within .library-search-icon {
+  color: var(--cw-purple);
+}
+.library-search input::-webkit-search-cancel-button {
+  display: none; /* we render our own clear button */
+}
+.library-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--cw-text-dim);
+  pointer-events: none;
+}
+.library-search-clear {
+  position: absolute;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--cw-text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.library-search-clear:hover {
+  color: inherit;
+  background: rgba(157, 140, 255, 0.15);
 }
 .library-toolbar select {
   max-width: 180px;
@@ -299,6 +365,7 @@ kbd {
   background: radial-gradient(circle at 50% 30%, rgba(157, 140, 255, 0.2), transparent 65%);
 }
 .library-active-pill,
+.library-desktop-pill,
 .library-lock,
 .library-rarity {
   font-size: 10px;
@@ -313,6 +380,14 @@ kbd {
   left: 8px;
   color: #04151a;
   background: var(--cw-cyan);
+  font-weight: 700;
+}
+.library-desktop-pill {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  color: #120c23;
+  background: #b8ffa1;
   font-weight: 700;
 }
 .library-lock {
@@ -384,6 +459,10 @@ kbd {
   color: var(--cw-text-dim);
   border: 1px dashed rgba(157, 140, 255, 0.3);
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 .library-dev-unlock {
   margin-top: 18px;

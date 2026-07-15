@@ -81,6 +81,8 @@ button.danger {
 
 input[type='text'],
 input[type='password'],
+input[type='search'],
+input:not([type]),
 select,
 textarea {
   font: inherit;

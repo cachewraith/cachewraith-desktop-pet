@@ -14,7 +14,12 @@ export const AppEvents = {
   petStateChanged: 'cachewraith://pet-state-changed',
   petProfileChanged: 'cachewraith://pet-profile-changed',
   activePetChanged: 'cachewraith://active-pet-changed',
+  /** JS-to-JS only: the companion pet list changed (payload: string[]). */
+  companionsChanged: 'cachewraith://companions-changed',
   petSizeChanged: 'cachewraith://pet-size-changed',
+  soundVolumeChanged: 'cachewraith://sound-volume-changed',
+  /** Emitted by Rust while the user is typing anywhere (activity only, no keys). */
+  userTyping: 'cachewraith://user-typing',
 } as const;
 
 export type AppEventName = (typeof AppEvents)[keyof typeof AppEvents];

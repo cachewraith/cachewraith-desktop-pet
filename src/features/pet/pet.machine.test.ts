@@ -68,6 +68,36 @@ describe('petMachine', () => {
     expect(actor.getSnapshot().value).toBe('eating');
   });
 
+  it('slapping makes the pet sad, even waking it from sleep', () => {
+    const actor = actorAt([{ type: 'READY' }, { type: 'SLAP' }]);
+    expect(actor.getSnapshot().value).toBe('sad');
+    actor.send({ type: 'PET_CLICKED' });
+    expect(actor.getSnapshot().value).toBe('happy');
+
+    const sleeper = actorAt([{ type: 'READY' }, { type: 'BECOME_SLEEPY' }, { type: 'SLAP' }]);
+    expect(sleeper.getSnapshot().value).toBe('sad');
+  });
+
+  it('starts typing from idle and stops back to idle', () => {
+    const actor = actorAt([{ type: 'READY' }, { type: 'TYPING_START' }]);
+    expect(actor.getSnapshot().value).toBe('typing');
+    actor.send({ type: 'TYPING_STOP' });
+    expect(actor.getSnapshot().value).toBe('idle');
+  });
+
+  it('typing interrupts walking but not sleeping', () => {
+    const walker = actorAt([{ type: 'READY' }, { type: 'START_WALKING' }, { type: 'TYPING_START' }]);
+    expect(walker.getSnapshot().value).toBe('typing');
+
+    const sleeper = actorAt([{ type: 'READY' }, { type: 'BECOME_SLEEPY' }, { type: 'TYPING_START' }]);
+    expect(sleeper.getSnapshot().value).toBe('sleeping');
+  });
+
+  it('interactions win over typing', () => {
+    const actor = actorAt([{ type: 'READY' }, { type: 'TYPING_START' }, { type: 'FEED' }]);
+    expect(actor.getSnapshot().value).toBe('eating');
+  });
+
   it('clicking while idle makes the pet happy and counts clicks', () => {
     const actor = actorAt([{ type: 'READY' }, { type: 'PET_CLICKED' }]);
     expect(actor.getSnapshot().value).toBe('happy');

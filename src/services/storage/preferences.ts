@@ -20,7 +20,13 @@ export const PET_SIZE_SCALES: Record<PetSizeName, number> = {
 export interface Preferences {
   windowX: number | null;
   windowY: number | null;
+  /** Extra desktop pets shown in companion windows (pet ids, max 4). */
+  companionPets: string[];
+  /** Last window position per companion pet id, in physical pixels. */
+  companionPositions: Record<string, { x: number; y: number }>;
   soundEnabled: boolean;
+  /** 0–100; 50 matches the original fixed loudness. */
+  soundVolume: number;
   reducedMotion: boolean;
   theme: ThemeName;
   speechBubbleDurationMs: number;
@@ -45,7 +51,10 @@ export const DEFAULT_PERSONALITY =
 export const DEFAULT_PREFERENCES: Preferences = {
   windowX: null,
   windowY: null,
+  companionPets: [],
+  companionPositions: {},
   soundEnabled: true,
+  soundVolume: 70,
   reducedMotion: false,
   theme: 'system',
   speechBubbleDurationMs: 4000,

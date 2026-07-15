@@ -20,6 +20,9 @@ export const STATE_TO_ANIMATION: Record<PetStateName, PetAnimationName | null> =
   hungry: 'hungry',
   eating: 'eat',
   talking: 'talk',
+  // Pets have no dedicated typing sheet; the busy "talk" loop reads well
+  // under the laptop overlay the window draws on top.
+  typing: 'talk',
   celebrating: 'celebrate',
   dragging: 'idle',
   hidden: null, // rendering pauses entirely

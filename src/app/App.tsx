@@ -10,6 +10,7 @@ import { useMachine } from '@xstate/react';
 import { ChatPanel } from '../components/chat/ChatPanel';
 import { PetCanvas } from '../components/pet/PetCanvas';
 import { PetMenu } from '../components/pet/PetMenu';
+import { PixelLaptop } from '../components/pet/PixelLaptop';
 import { SpeechBubble } from '../components/pet/SpeechBubble';
 import { useChat } from '../features/chat/useChat';
 import { petMachine } from '../features/pet/pet.machine';
@@ -28,12 +29,26 @@ import {
   type ActivePetChangedPayload,
   type PetDialogue,
 } from '../features/pet-library/types/pet-library.types';
-import { playSound, setMuted, syncMuteFromPreferences } from '../services/sound/sound';
+import {
+  playEatingSound,
+  playSlapSound,
+  playSnoreSound,
+  playSound,
+  playTypingSound,
+  setMuted,
+  setPetVoice,
+  setVolume,
+  stopEatingSound,
+  stopSnoreSound,
+  stopTypingSound,
+  syncSoundFromPreferences,
+} from '../services/sound/sound';
 import {
   getPreference,
   PET_SIZE_SCALES,
   type PetSizeName,
 } from '../services/storage/preferences';
+import { syncCompanionWindows } from '../services/windows/companionWindows';
 import {
   hidePetWindow,
   restorePositionAndShow,
@@ -46,6 +61,8 @@ import {
 import { AppEvents } from '../types/events';
 import { logger } from '../utils/logger';
 
+const SLAP_REACTIONS = ['Ouch!! 😵', 'Hey!! What was that for?!', 'Ow… my ectoplasm… 💢', 'Rude!!'];
+
 const CLICK_REACTIONS = [
   'Boo! 👻',
   'Hi there!',
@@ -57,6 +74,8 @@ const CLICK_REACTIONS = [
 
 const DRAG_THRESHOLD_PX = 6;
 const SINGLE_CLICK_DELAY_MS = 260;
+/** The pet stops typing this long after the user's last keystroke. */
+const TYPING_STOP_DELAY_MS = 2_000;
 
 export default function App() {
   const [state, send] = useMachine(petMachine);
@@ -77,6 +96,7 @@ export default function App() {
   const bubbleTimer = useRef<number | null>(null);
   const bubbleDuration = useRef(4000);
   const clickTimer = useRef<number | null>(null);
+  const typingStopTimer = useRef<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const dragActive = useRef(false);
   const moveDebounce = useRef<number | null>(null);
@@ -122,7 +142,7 @@ export default function App() {
 
     (async () => {
       try {
-        await syncMuteFromPreferences();
+        await syncSoundFromPreferences();
         setReducedMotion(
           (await getPreference('reducedMotion')) ||
             window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -133,6 +153,7 @@ export default function App() {
         const petId = await resolveActivePetId();
         setActivePetId(petId);
         dialogueRef.current = getManifest(petId)?.dialogue;
+        setPetVoice(getManifest(petId)?.category);
 
         statsService = await PetStatsService.create();
         if (disposed) return;
@@ -151,6 +172,9 @@ export default function App() {
       }
       await restorePositionAndShow();
       sendRef.current({ type: 'READY' });
+      syncCompanionWindows().catch((error) =>
+        logger.warn('app', 'failed to open companion windows', error)
+      );
     })();
 
     return () => {
@@ -164,6 +188,32 @@ export default function App() {
   useEffect(() => {
     service?.setPetState(petState);
   }, [service, petState]);
+
+  // ---- Munching sound while eating ----
+  // The looped clip stops on its own after 3s; the cleanup also stops it
+  // early if the eating state is interrupted (drag, chat, hide…).
+  useEffect(() => {
+    if (petState !== 'eating') return;
+    playEatingSound();
+    return () => stopEatingSound();
+  }, [petState]);
+
+  // ---- Snoring for the first 5s of sleep ----
+  // The clip stops itself after 5s; the cleanup stops it early on wake-up.
+  useEffect(() => {
+    if (petState !== 'sleeping') return;
+    playSnoreSound();
+    return () => stopSnoreSound();
+  }, [petState]);
+
+  // ---- Keyboard clatter while typing along ----
+  // Loops for the whole typing state; only the main pet plays it so
+  // companions don't stack the same clip. Cleanup stops it on any exit.
+  useEffect(() => {
+    if (petState !== 'typing') return;
+    playTypingSound();
+    return () => stopTypingSound();
+  }, [petState]);
 
   // ---- Derive hunger/sleep transitions from stats ----
   useEffect(() => {
@@ -196,6 +246,12 @@ export default function App() {
     showBubble(randomDialogueLine(dialogueRef.current, 'fed', 'Nom nom… ✨'));
     void service?.feed();
   }, [send, service, showBubble]);
+
+  const slap = useCallback(() => {
+    send({ type: 'SLAP' });
+    playSlapSound();
+    showBubble(SLAP_REACTIONS[Math.floor(Math.random() * SLAP_REACTIONS.length)]);
+  }, [send, showBubble]);
 
   const petThePet = useCallback(() => {
     send({ type: 'PET_CLICKED' });
@@ -259,6 +315,9 @@ export default function App() {
           setPetName(profile.name);
         }
       }),
+      listen<number>(AppEvents.soundVolumeChanged, (event) => {
+        if (typeof event.payload === 'number') setVolume(event.payload);
+      }),
       listen<PetSizeName>(AppEvents.petSizeChanged, (event) => {
         if (event.payload === 'small' || event.payload === 'medium' || event.payload === 'large') {
           setPetSize(event.payload);
@@ -270,6 +329,8 @@ export default function App() {
           setActivePetId(petId);
           dialogueRef.current = getManifest(petId)?.dialogue;
           const manifest = getManifest(petId);
+          setPetVoice(manifest?.category);
+          playSound('happy');
           showBubble(
             randomDialogueLine(
               manifest?.dialogue,
@@ -286,6 +347,23 @@ export default function App() {
       }
     };
   }, [feed, openChat, service, showBubble]);
+
+  // ---- Pet types along on its laptop while the user types anywhere ----
+  // Rust polls for keyboard activity (never key identities) and emits
+  // userTyping while keys are pressed; 2s of silence ends the reaction.
+  useEffect(() => {
+    const unlistenPromise = listen(AppEvents.userTyping, () => {
+      sendRef.current({ type: 'TYPING_START' });
+      if (typingStopTimer.current !== null) window.clearTimeout(typingStopTimer.current);
+      typingStopTimer.current = window.setTimeout(() => {
+        sendRef.current({ type: 'TYPING_STOP' });
+      }, TYPING_STOP_DELAY_MS);
+    });
+    return () => {
+      if (typingStopTimer.current !== null) window.clearTimeout(typingStopTimer.current);
+      unlistenPromise.then((unlisten) => unlisten()).catch(() => undefined);
+    };
+  }, []);
 
   // ---- Persist position after native drags ----
   useEffect(() => {
@@ -356,6 +434,29 @@ export default function App() {
     }, SINGLE_CLICK_DELAY_MS);
   }, [petState, petThePet, send, showBubble]);
 
+  // ---- Dismiss the right-click menu like a native context menu ----
+  // Close on any press outside the menu, on Escape, and when the window
+  // loses focus (clicking the desktop or another app blurs us).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (!target?.closest('.pet-menu')) setMenuOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    const onWindowBlur = () => setMenuOpen(false);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('blur', onWindowBlur);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('blur', onWindowBlur);
+    };
+  }, [menuOpen]);
+
   const onPetDoubleClick = useCallback(() => {
     if (clickTimer.current !== null) {
       window.clearTimeout(clickTimer.current);
@@ -370,16 +471,6 @@ export default function App() {
   }, []);
 
   const size = chatOpen ? PET_WINDOW_CHAT_SIZE : PET_WINDOW_SIZE;
-  const moodEmoji =
-    mood === 'happy'
-      ? '😊'
-      : mood === 'sad'
-        ? '💧'
-        : mood === 'hungry'
-          ? '🍬'
-          : mood === 'sleepy'
-            ? '😴'
-            : '✨';
 
   return (
     <div className={chatOpen ? 'pet-root pet-root-chat' : 'pet-root'}>
@@ -417,12 +508,10 @@ export default function App() {
           width={PET_WINDOW_SIZE.width}
           height={PET_WINDOW_SIZE.height - 40}
         />
+        {petState === 'typing' && <PixelLaptop reducedMotion={reducedMotion} />}
         <div className="pet-status-row">
-          <span className="mood-indicator" title={`Mood: ${mood}`} aria-label={`Mood: ${mood}`}>
-            {moodEmoji}
-          </span>
           {stats && (
-            <span className="level-indicator" title={`Level ${stats.level}`}>
+            <span className="level-indicator" title={`Level ${stats.level} — mood: ${mood}`}>
               Lv {stats.level}
             </span>
           )}
@@ -434,6 +523,7 @@ export default function App() {
           sleeping={petState === 'sleeping'}
           onFeed={feed}
           onPet={petThePet}
+          onSlap={slap}
           onTalk={() => void openChat()}
           onToggleSleep={toggleSleep}
           onOpenSettings={() => void openSettings()}

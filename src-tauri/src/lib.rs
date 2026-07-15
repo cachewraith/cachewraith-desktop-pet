@@ -6,6 +6,8 @@ mod positioning;
 mod shortcuts;
 #[cfg(desktop)]
 mod tray;
+#[cfg(desktop)]
+mod typing;
 
 use tauri::WindowEvent;
 use tauri_plugin_sql::{Migration, MigrationKind};
@@ -64,15 +66,19 @@ pub fn run() {
             {
                 tray::create_tray(app.handle())?;
                 shortcuts::register_toggle_shortcut(app.handle());
+                typing::spawn_typing_watcher(app.handle().clone());
             }
             Ok(())
         })
         .on_window_event(|window, event| {
-            // Closing any window only hides it; the app lives in the tray
-            // and quits exclusively through the tray "Quit" entry.
+            // Closing the pet or settings window only hides it; the app
+            // lives in the tray and quits exclusively through the tray
+            // "Quit" entry. Companion windows really close (dismissal).
             if let WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window.hide();
+                if !window.label().starts_with("companion-") {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
         })
         .run(tauri::generate_context!())

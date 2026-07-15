@@ -6,6 +6,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { emit } from '@tauri-apps/api/event';
 
 import { AppEvents } from '../../../types/events';
+import { getCompanionIds, removeCompanion } from '../../../services/windows/companionWindows';
 import { logger } from '../../../utils/logger';
 import { catalogManifests, unlockRuleFor } from '../data/pet-catalog';
 import { getManifest } from './pet-asset-loader';
@@ -79,6 +80,11 @@ export async function selectActivePet(pet: LibraryPet): Promise<void> {
   await persistActivePet(pet.manifest.id);
   const payload: ActivePetChangedPayload = { petId: pet.manifest.id };
   await emit(AppEvents.activePetChanged, payload);
+  // The pet is the main desktop pet now — close its companion window if any.
+  const companions = await getCompanionIds();
+  if (companions.includes(pet.manifest.id)) {
+    await removeCompanion(pet.manifest.id);
+  }
   invoke('set_tray_tooltip', { tooltip: pet.manifest.name }).catch((error) => {
     logger.warn('pet-library', 'failed to update tray tooltip', error);
   });

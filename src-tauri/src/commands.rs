@@ -1,17 +1,19 @@
-use tauri::AppHandle;
+use tauri::{AppHandle, WebviewWindow};
 
 use crate::positioning::{self, WindowPos};
 
-/// Restore a previously saved pet-window position, falling back to the
-/// bottom-right corner when the saved spot is off-screen (e.g. after a
-/// monitor was unplugged). Returns the position that was actually applied.
+/// Restore a previously saved position for the window that invoked the
+/// command (the main pet or a companion), falling back to the bottom-right
+/// corner when the saved spot is off-screen (e.g. after a monitor was
+/// unplugged). `offset_x` shifts the corner fallback left so companion
+/// windows fan out instead of stacking. Returns the applied position.
 #[tauri::command]
 pub fn apply_saved_position(
-    app: AppHandle,
+    window: WebviewWindow,
     x: Option<i32>,
     y: Option<i32>,
+    offset_x: Option<i32>,
 ) -> Result<WindowPos, String> {
-    let window = positioning::pet_window(&app)?;
     if let (Some(x), Some(y)) = (x, y) {
         if positioning::is_position_reachable(&window, x, y) {
             let pos = WindowPos { x, y };
@@ -19,7 +21,7 @@ pub fn apply_saved_position(
             return Ok(pos);
         }
     }
-    let pos = positioning::corner_position(&window)?;
+    let pos = positioning::corner_position(&window, offset_x.unwrap_or(0))?;
     positioning::move_window(&window, pos)?;
     Ok(pos)
 }

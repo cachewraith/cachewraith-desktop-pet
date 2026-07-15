@@ -5,6 +5,7 @@ interface PetMenuProps {
   sleeping: boolean;
   onFeed: () => void;
   onPet: () => void;
+  onSlap: () => void;
   onTalk: () => void;
   onToggleSleep: () => void;
   onOpenSettings: () => void;
@@ -16,6 +17,7 @@ export function PetMenu({
   sleeping,
   onFeed,
   onPet,
+  onSlap,
   onTalk,
   onToggleSleep,
   onOpenSettings,
@@ -39,6 +41,7 @@ export function PetMenu({
     <div className="pet-menu" role="menu" aria-label="Pet interactions">
       {item('🍬 Feed', onFeed)}
       {item('💜 Pet', onPet)}
+      {item('👋 Slap', onSlap)}
       {item('💬 Talk', onTalk)}
       {item(sleeping ? '☀️ Wake up' : '🌙 Sleep', onToggleSleep)}
       {item('⚙️ Settings', onOpenSettings)}

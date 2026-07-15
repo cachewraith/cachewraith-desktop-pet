@@ -19,8 +19,13 @@ pub fn pet_window<R: Runtime>(app: &AppHandle<R>) -> Result<WebviewWindow<R>, St
 }
 
 /// Bottom-right corner of the primary monitor's work area (respects the
-/// Windows taskbar), with a small margin.
-pub fn corner_position<R: Runtime>(window: &WebviewWindow<R>) -> Result<WindowPos, String> {
+/// Windows taskbar), with a small margin. `offset_x` shifts the spot to the
+/// left (clamped to the work area) so companion windows don't stack exactly
+/// on top of the main pet.
+pub fn corner_position<R: Runtime>(
+    window: &WebviewWindow<R>,
+    offset_x: i32,
+) -> Result<WindowPos, String> {
     let monitor = window
         .primary_monitor()
         .map_err(|e| e.to_string())?
@@ -31,8 +36,10 @@ pub fn corner_position<R: Runtime>(window: &WebviewWindow<R>) -> Result<WindowPo
     let margin = (MARGIN * monitor.scale_factor()).round() as i32;
     let size = window.outer_size().map_err(|e| e.to_string())?;
 
+    let x = (work.position.x + work.size.width as i32 - size.width as i32 - margin - offset_x)
+        .max(work.position.x + margin);
     Ok(WindowPos {
-        x: work.position.x + work.size.width as i32 - size.width as i32 - margin,
+        x,
         y: work.position.y + work.size.height as i32 - size.height as i32 - margin,
     })
 }
@@ -72,7 +79,7 @@ pub fn move_window<R: Runtime>(window: &WebviewWindow<R>, pos: WindowPos) -> Res
 /// Move the pet window back to the default bottom-right corner.
 pub fn reset_to_corner<R: Runtime>(app: &AppHandle<R>) -> Result<WindowPos, String> {
     let window = pet_window(app)?;
-    let pos = corner_position(&window)?;
+    let pos = corner_position(&window, 0)?;
     move_window(&window, pos)?;
     Ok(pos)
 }

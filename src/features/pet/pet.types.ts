@@ -22,6 +22,7 @@ export type PetStateName =
   | 'hungry'
   | 'eating'
   | 'talking'
+  | 'typing'
   | 'celebrating'
   | 'dragging'
   | 'hidden';

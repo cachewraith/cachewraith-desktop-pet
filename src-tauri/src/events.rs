@@ -9,3 +9,4 @@ pub const RESET_POSITION: &str = "cachewraith://reset-position";
 pub const TOGGLE_MUTE: &str = "cachewraith://toggle-mute";
 pub const OPEN_SETTINGS_SECTION: &str = "cachewraith://open-settings-section";
 pub const AUTOSTART_CHANGED: &str = "cachewraith://autostart-changed";
+pub const USER_TYPING: &str = "cachewraith://user-typing";

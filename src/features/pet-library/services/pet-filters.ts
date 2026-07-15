@@ -32,16 +32,22 @@ const RARITY_ORDER: Record<PetRarity, number> = {
 };
 
 export function matchesSearch(pet: LibraryPet, search: string): boolean {
-  const q = search.trim().toLowerCase();
-  if (!q) return true;
+  const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
   const m = pet.manifest;
-  return (
-    m.name.toLowerCase().includes(q) ||
-    m.description.toLowerCase().includes(q) ||
-    m.category.includes(q) ||
-    m.rarity.includes(q) ||
-    m.tags.some((tag) => tag.toLowerCase().includes(q))
-  );
+  const haystack = [
+    m.name,
+    m.description,
+    m.category,
+    m.rarity,
+    m.personality,
+    ...m.tags,
+  ]
+    .join(' ')
+    .toLowerCase();
+  // Every term must appear somewhere, so "rare fox" finds a rare fox even
+  // though no single field contains both words.
+  return terms.every((term) => haystack.includes(term));
 }
 
 export function matchesOwnership(pet: LibraryPet, filter: OwnershipFilter): boolean {
