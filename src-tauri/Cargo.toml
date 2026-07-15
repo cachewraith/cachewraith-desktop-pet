@@ -1,6 +1,6 @@
 [package]
 name = "cachewraith"
-version = "0.2.0"
+version = "0.3.0"
 description = "CacheWraith - a friendly animated desktop ghost pet"
 authors = ["CacheWraith contributors"]
 edition = "2021"
