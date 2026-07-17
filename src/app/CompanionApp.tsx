@@ -17,6 +17,7 @@ import type { PetStateName } from '../features/pet/pet.types';
 import { getManifest } from '../features/pet-library/services/pet-asset-loader';
 import { randomDialogueLine } from '../features/pet-library/services/pet-dialogue';
 import {
+  playMeowSound,
   playSlapSound,
   playSnoreSound,
   playSound,
@@ -47,6 +48,8 @@ const SLAP_REACTIONS = ['Ouch!! 😵', 'Hey!! What was that for?!', 'Rude!!'];
 const DRAG_THRESHOLD_PX = 6;
 /** The pet stops typing this long after the user's last keystroke. */
 const TYPING_STOP_DELAY_MS = 2_000;
+/** Cat pets meow this often; other pets stay quiet. */
+const MEOW_INTERVAL_MS = 5_000;
 
 /** Compact right-click menu for a companion pet; mirrors PetMenu's markup. */
 function CompanionMenu({
@@ -149,6 +152,20 @@ export default function CompanionApp({ petId }: { petId: string }) {
     playSnoreSound();
     return () => stopSnoreSound();
   }, [petState]);
+
+  // ---- Cat pets meow every few seconds, like the main pet ----
+  const petStateRef = useRef(petState);
+  useEffect(() => {
+    petStateRef.current = petState;
+  }, [petState]);
+  useEffect(() => {
+    if (!manifest?.tags.includes('cat')) return;
+    const timer = window.setInterval(() => {
+      const current = petStateRef.current;
+      if (current !== 'hidden' && current !== 'sleeping') playMeowSound();
+    }, MEOW_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [manifest]);
 
   // ---- Tauri events shared with the main pet window ----
   useEffect(() => {

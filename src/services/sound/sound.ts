@@ -13,6 +13,7 @@ import nomNomUrl from '../../assets/sounds/nom-nom-nom.mp3';
 import snoreUrl from '../../assets/sounds/snore-mimimimimimi.mp3';
 import slapUrl from '../../assets/sounds/slap-oh_LGvkhyt.mp3';
 import typingUrl from '../../assets/sounds/among-us-typing.mp3';
+import meowUrl from '../../assets/sounds/meow-sound.mp3';
 
 type SoundName = 'click' | 'feed' | 'eat' | 'happy' | 'levelUp' | 'message';
 
@@ -190,6 +191,9 @@ const typingClip = createLoopingClip(typingUrl);
 
 /** One-shot slap clip for the slap interaction. */
 export const playSlapSound = createOneShotClip(slapUrl, 'click');
+
+/** One-shot meow for cat pets; silence (no synth fallback) for everyone else. */
+export const playMeowSound = createOneShotClip(meowUrl);
 
 /** Loop the keyboard clatter while the pet types along with the user. */
 export const playTypingSound = typingClip.play;

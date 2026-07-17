@@ -31,6 +31,7 @@ import {
 } from '../features/pet-library/types/pet-library.types';
 import {
   playEatingSound,
+  playMeowSound,
   playSlapSound,
   playSnoreSound,
   playSound,
@@ -76,6 +77,8 @@ const DRAG_THRESHOLD_PX = 6;
 const SINGLE_CLICK_DELAY_MS = 260;
 /** The pet stops typing this long after the user's last keystroke. */
 const TYPING_STOP_DELAY_MS = 2_000;
+/** Cat pets meow this often; other pets stay quiet. */
+const MEOW_INTERVAL_MS = 5_000;
 
 export default function App() {
   const [state, send] = useMachine(petMachine);
@@ -205,6 +208,22 @@ export default function App() {
     playSnoreSound();
     return () => stopSnoreSound();
   }, [petState]);
+
+  // ---- Cat pets meow every few seconds ----
+  // Keyed off the "cat" manifest tag; skipped while hidden or asleep so the
+  // meow never plays from an invisible window or over the snore clip.
+  const petStateRef = useRef(petState);
+  useEffect(() => {
+    petStateRef.current = petState;
+  }, [petState]);
+  useEffect(() => {
+    if (!getManifest(activePetId)?.tags.includes('cat')) return;
+    const timer = window.setInterval(() => {
+      const current = petStateRef.current;
+      if (current !== 'hidden' && current !== 'sleeping') playMeowSound();
+    }, MEOW_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [activePetId]);
 
   // ---- Keyboard clatter while typing along ----
   // Loops for the whole typing state; only the main pet plays it so
